@@ -1414,6 +1414,32 @@
     return item;
   });
 
+  // Migrate legacy residence wording in stored data (지역 표기 → 일반 표현)
+  const scrubRegionText = (value) => {
+    if (typeof value !== 'string') return value;
+    return value
+      .replace(/\uC6A9\uC778\s*\uC218\uC9C0\uAD6C/g, '우리 동네')
+      .replace(/\uC218\uC9C0\uAD6C/g, '우리 동네')
+      .replace(/\uC218\uC9C0\s*\uD558\uC6B0\uC2A4/g, '우리 집')
+      .replace(/\uC218\uC9C0\s*\uC544\uD30C\uD2B8/g, '우리 집')
+      .replace(/\uC218\uC9C0/g, '우리 동네')
+      .replace(/\uC6A9\uC778/g, '우리 동네');
+  };
+  let regionMigrated = false;
+  items = items.map(item => {
+    Object.keys(item).forEach(key => {
+      const cleaned = scrubRegionText(item[key]);
+      if (cleaned !== item[key]) {
+        item[key] = cleaned;
+        regionMigrated = true;
+      }
+    });
+    return item;
+  });
+  if (regionMigrated) {
+    localStorage.setItem('our_home_items', JSON.stringify(items));
+  }
+
   // Ensure sample treatment item exists if not present
   if (!items.some(i => i.name.includes('트리트먼트'))) {
     items.push({
