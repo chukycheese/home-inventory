@@ -1414,16 +1414,19 @@
     return item;
   });
 
-  // Migrate legacy residence wording in stored data (지역 표기 → 일반 표현)
+  // Migrate legacy residence wording stored in this browser.
+  // The legacy spellings stay escaped so the published source does not carry them.
+  const LEGACY_REGION_RE = [
+    [/\uC6A9\uC778\s*\uC218\uC9C0\uAD6C/g, '\uC6B0\uB9AC \uB3D9\uB124'],
+    [/\uC218\uC9C0\uAD6C/g, '\uC6B0\uB9AC \uB3D9\uB124'],
+    [/\uC218\uC9C0\s*\uD558\uC6B0\uC2A4/g, '\uC6B0\uB9AC \uC9D1'],
+    [/\uC218\uC9C0\s*\uC544\uD30C\uD2B8/g, '\uC6B0\uB9AC \uC9D1'],
+    [/\uC218\uC9C0/g, '\uC6B0\uB9AC \uB3D9\uB124'],
+    [/\uC6A9\uC778/g, '\uC6B0\uB9AC \uB3D9\uB124']
+  ];
   const scrubRegionText = (value) => {
     if (typeof value !== 'string') return value;
-    return value
-      .replace(/\uC6A9\uC778\s*\uC218\uC9C0\uAD6C/g, '우리 동네')
-      .replace(/\uC218\uC9C0\uAD6C/g, '우리 동네')
-      .replace(/\uC218\uC9C0\s*\uD558\uC6B0\uC2A4/g, '우리 집')
-      .replace(/\uC218\uC9C0\s*\uC544\uD30C\uD2B8/g, '우리 집')
-      .replace(/\uC218\uC9C0/g, '우리 동네')
-      .replace(/\uC6A9\uC778/g, '우리 동네');
+    return LEGACY_REGION_RE.reduce((out, [re, to]) => out.replace(re, to), value);
   };
   let regionMigrated = false;
   items = items.map(item => {
